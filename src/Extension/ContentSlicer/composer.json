@@ -1,0 +1,15 @@
+{
+    "name": "alto/commonmark-content-slicer",
+    "description": "Semantic section slicing based on heading hierarchy",
+    "type": "library",
+    "license": "MIT",
+    "require": {
+        "php": "^8.1",
+        "league/commonmark": "^2.7"
+    },
+    "autoload": {
+        "psr-4": {
+            "Alto\\\\CommonMark\\\\Extension\\\\ContentSlicer\\\\": ""
+        }
+    }
+}
