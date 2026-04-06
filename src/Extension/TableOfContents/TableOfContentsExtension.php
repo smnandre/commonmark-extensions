@@ -2,6 +2,15 @@
 
 declare(strict_types=1);
 
+/*
+ * This file is part of the ALTO Commonmark package.
+ *
+ * © 2025–present Simon André
+ *
+ * For full copyright and license information, please see
+ * the LICENSE file distributed with this source code.
+ */
+
 namespace Alto\CommonMark\Extension\TableOfContents;
 
 use League\CommonMark\Environment\EnvironmentBuilderInterface;
@@ -19,10 +28,10 @@ use League\CommonMark\Parser\MarkdownParserStateInterface;
 use League\CommonMark\Renderer\ChildNodeRendererInterface;
 use League\CommonMark\Renderer\NodeRendererInterface;
 
-final class TableOfContentsExtension implements ExtensionInterface
+final readonly class TableOfContentsExtension implements ExtensionInterface
 {
     /** @var array<string, mixed> */
-    private readonly array $config;
+    private array $config;
 
     /**
      * @param array<string, mixed> $config
@@ -63,16 +72,13 @@ final class TocBlock extends AbstractBlock
     }
 }
 
-final class TocBlockParser implements BlockStartParserInterface
+final readonly class TocBlockParser implements BlockStartParserInterface
 {
     /**
      * @param array<string, mixed> $config
-     *
-     * @phpstan-param array<string, mixed> $config
      */
     public function __construct(
-        /** @phpstan-ignore-next-line property.onlyWritten */
-        private readonly array $config,
+        private array $config,
     ) {
     }
 
@@ -86,15 +92,14 @@ final class TocBlockParser implements BlockStartParserInterface
 
         $line = trim($cursor->getRemainder());
 
-        if (!preg_match('/^@toc(?:\s*\{([^}]+)\})?$/', $line, $matches)) {
+        $markerRaw = $this->config['marker'] ?? '@toc';
+        $marker = preg_quote(is_string($markerRaw) ? $markerRaw : '@toc', '/');
+        if (!preg_match('/^'.$marker.'(?:\s*\{([^}]+)\})?$/', $line, $matches)) {
             return BlockStart::none();
         }
 
         $cursor->advanceToEnd();
 
-        /**
-         * @var array<string, mixed> $options
-         */
         $options = [];
         if (isset($matches[1])) {
             $options = $this->parseOptions($matches[1]);
@@ -110,17 +115,8 @@ final class TocBlockParser implements BlockStartParserInterface
      */
     private function parseOptions(string $optionsStr): array
     {
-        /**
-         * @var array<string, mixed> $options
-         */
         $options = [];
-        $pairs = preg_split('/,\s*/', $optionsStr);
-
-        if (false === $pairs) {
-            return $options;
-        }
-
-        foreach ($pairs as $pair) {
+        foreach (preg_split('/,\s*/', $optionsStr) ?: [] as $pair) {
             if (preg_match('/^(\w+):\s*(.+)$/', trim($pair), $matches)) {
                 $key = $matches[1];
                 $value = trim($matches[2], '"\'');
@@ -157,13 +153,13 @@ final class TocBlockContinueParser extends AbstractBlockContinueParser
     }
 }
 
-final class TocProcessor
+final readonly class TocProcessor
 {
     /**
      * @param array<string, mixed> $config
      */
     public function __construct(
-        private readonly array $config,
+        private array $config,
     ) {
     }
 
@@ -246,13 +242,13 @@ final class TocProcessor
     }
 }
 
-final class TocRenderer implements NodeRendererInterface
+final readonly class TocRenderer implements NodeRendererInterface
 {
     /**
      * @param array<string, mixed> $config
      */
     public function __construct(
-        private readonly array $config,
+        private array $config,
     ) {
     }
 

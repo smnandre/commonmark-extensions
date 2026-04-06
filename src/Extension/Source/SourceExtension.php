@@ -2,6 +2,15 @@
 
 declare(strict_types=1);
 
+/*
+ * This file is part of the ALTO Commonmark package.
+ *
+ * © 2025–present Simon André
+ *
+ * For full copyright and license information, please see
+ * the LICENSE file distributed with this source code.
+ */
+
 namespace Alto\CommonMark\Extension\Source;
 
 use League\CommonMark\Environment\EnvironmentBuilderInterface;
@@ -18,15 +27,15 @@ use League\CommonMark\Parser\MarkdownParserStateInterface;
 use League\CommonMark\Renderer\ChildNodeRendererInterface;
 use League\CommonMark\Renderer\NodeRendererInterface;
 
-final class SourceExtension implements ExtensionInterface
+final readonly class SourceExtension implements ExtensionInterface
 {
-    private readonly string $basePath;
+    private string $basePath;
 
     /** @var list<string> */
-    private readonly array $allowedExtensions;
+    private array $allowedExtensions;
 
-    private readonly bool $escapeHtml;
-    private readonly int $maxFileSize;
+    private bool $escapeHtml;
+    private int $maxFileSize;
 
     /**
      * @param list<string> $allowedExtensions
@@ -74,14 +83,14 @@ final class SourceBlock extends AbstractBlock
     }
 }
 
-final class SourceBlockParser implements BlockStartParserInterface
+final readonly class SourceBlockParser implements BlockStartParserInterface
 {
     /** @var list<string> */
-    private readonly array $allowedExtensions;
+    private array $allowedExtensions;
 
-    private readonly int $maxFileSize;
+    private int $maxFileSize;
 
-    private readonly string $basePath;
+    private string $basePath;
 
     /**
      * @param list<string> $allowedExtensions
@@ -206,13 +215,7 @@ final class SourceBlockParser implements BlockStartParserInterface
             return $options;
         }
 
-        $pairs = preg_split('/,\s*/', $optionsStr);
-
-        if (false === $pairs) {
-            return $options;
-        }
-
-        foreach ($pairs as $pair) {
+        foreach (preg_split('/,\s*/', $optionsStr) ?: [] as $pair) {
             if (preg_match('/^(\w+):\s*(.+)$/', trim($pair), $matches)) {
                 $key = $matches[1];
                 $value = trim($matches[2], '"\'');
@@ -237,6 +240,10 @@ final class SourceBlockParser implements BlockStartParserInterface
     private function loadRawFile(string $path, array $options): array
     {
         $fullPath = $this->resolvePath($path);
+
+        if ('' === $fullPath) {
+            return ['error' => "Path not allowed: $path"];
+        }
 
         if (!file_exists($fullPath)) {
             return ['error' => "File not found: $path"];
@@ -280,11 +287,34 @@ final class SourceBlockParser implements BlockStartParserInterface
 
     private function resolvePath(string $path): string
     {
-        if (str_starts_with($path, '/')) {
-            return $path;
+        $realBase = realpath($this->basePath);
+        if (false === $realBase) {
+            return '';
         }
 
-        return $this->basePath.'/'.$path;
+        $candidate = str_starts_with($path, '/')
+            ? $realBase.$path
+            : $realBase.'/'.$path;
+
+        $parts = explode('/', $candidate);
+        $resolved = [];
+        foreach ($parts as $part) {
+            if ('' === $part || '.' === $part) {
+                continue;
+            }
+            if ('..' === $part) {
+                array_pop($resolved);
+            } else {
+                $resolved[] = $part;
+            }
+        }
+        $resolvedPath = '/'.implode('/', $resolved);
+
+        if (!str_starts_with($resolvedPath, $realBase.'/') && $resolvedPath !== $realBase) {
+            return '';
+        }
+
+        return $resolvedPath;
     }
 
     private function detectLanguage(string $path): ?string
@@ -363,9 +393,9 @@ final class SourceBlockContinueParser extends AbstractBlockContinueParser
     }
 }
 
-final class SourceRenderer implements NodeRendererInterface
+final readonly class SourceRenderer implements NodeRendererInterface
 {
-    private readonly bool $escapeHtml;
+    private bool $escapeHtml;
 
     public function __construct(bool $escapeHtml)
     {

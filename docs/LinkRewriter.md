@@ -1,14 +1,7 @@
 # LinkRewriter Extension
 
-Rewrites URLs in links and images through various strategies: base URI prepending, simple mapping, regex patterns, or custom callbacks.
-
-## Installation
-
-The extension is included in the `alto/commonmark` package:
-
-```bash
-composer require alto/commonmark
-```
+Rewrites URLs in links and images through various strategies: base URI
+prepending, simple mapping, regex patterns, or custom callbacks.
 
 ## Basic Usage
 
@@ -127,13 +120,15 @@ new LinkRewriterExtension([
 ])
 ```
 
-Rewriters are applied sequentially, so the output of one becomes the input to the next.
+Rewriters are applied sequentially, so the output of one becomes the input to
+the next.
 
 ## Output Examples
 
 ### Base URI
 
 Input markdown:
+
 ```markdown
 [Home](/)
 [About](/about)
@@ -143,6 +138,7 @@ Input markdown:
 Config: `['base_uri' => 'https://mysite.com']`
 
 Output:
+
 ```html
 <a href="https://mysite.com/">Home</a>
 <a href="https://mysite.com/about">About</a>
@@ -152,12 +148,14 @@ Output:
 ### URL Mapping
 
 Input markdown:
+
 ```markdown
 [Old link](/old-api)
 [File](readme.txt)
 ```
 
 Config:
+
 ```php
 'map' => [
     '/old-api' => '/api/v2',
@@ -166,6 +164,7 @@ Config:
 ```
 
 Output:
+
 ```html
 <a href="/api/v2">Old link</a>
 <a href="README.md">File</a>
@@ -174,12 +173,14 @@ Output:
 ### Regex Pattern
 
 Input markdown:
+
 ```markdown
 [Version 1](/docs/v1/intro)
 [Version 2](/docs/v2/intro)
 ```
 
 Config:
+
 ```php
 'pattern' => [
     'pattern' => '/^\/docs\/(v\d+)\/(.+)$/',
@@ -188,6 +189,7 @@ Config:
 ```
 
 Output:
+
 ```html
 <a href="https://versioned-docs.com/v1/intro">Version 1</a>
 <a href="https://versioned-docs.com/v2/intro">Version 2</a>
@@ -357,7 +359,7 @@ The extension also rewrites image URLs:
 With config `['base_uri' => 'https://mysite.com']`:
 
 ```html
-<img src="https://mysite.com/images/photo.jpg" alt="Alt text" />
+<img src="https://mysite.com/images/photo.jpg" alt="Alt text"/>
 ```
 
 ## Implementation Details
@@ -367,7 +369,8 @@ With config `['base_uri' => 'https://mysite.com']`:
 - **Nodes Modified**: Link and Image nodes
 - **Rewriter Interface**: Composable functions taking URL and Node
 
-The extension walks the AST after parsing, finds all Link and Image nodes, and applies configured rewriters in sequence.
+The extension walks the AST after parsing, finds all Link and Image nodes, and
+applies configured rewriters in sequence.
 
 ## Troubleshooting
 
@@ -426,5 +429,12 @@ Check your conditions:
 ## See Also
 
 - [HeadingLevel Extension](HeadingLevel.md) - Adjust heading levels
-- [`league/commonmark` documentation](https://commonmark.thephpleague.com/)
-- [LinkRewriter README in source](../src/Extension/LinkRewriter/README.md)
+- [league/commonmark documentation](https://commonmark.thephpleague.com/)
+
+---
+
+> **This package is part of
+the [alto/commonmark](https://github.com/PhpAlto/commonmark) monorepo.**  
+> This repository is a read-only split — to file issues, open pull requests, or
+> contribute, please use the main repository: *
+*https://github.com/PhpAlto/commonmark**

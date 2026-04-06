@@ -2,6 +2,15 @@
 
 declare(strict_types=1);
 
+/*
+ * This file is part of the ALTO Commonmark package.
+ *
+ * © 2025–present Simon André
+ *
+ * For full copyright and license information, please see
+ * the LICENSE file distributed with this source code.
+ */
+
 namespace Alto\CommonMark\Extension\Include;
 
 use League\CommonMark\Environment\EnvironmentBuilderInterface;
@@ -20,16 +29,16 @@ use League\CommonMark\Parser\MarkdownParserStateInterface;
 use League\CommonMark\Renderer\ChildNodeRendererInterface;
 use League\CommonMark\Renderer\NodeRendererInterface;
 
-final class IncludeExtension implements ExtensionInterface
+final readonly class IncludeExtension implements ExtensionInterface
 {
-    private readonly string $basePath;
+    private string $basePath;
 
     /** @var list<string> */
-    private readonly array $allowedExtensions;
+    private array $allowedExtensions;
 
-    private readonly int $maxDepth;
+    private int $maxDepth;
 
-    private readonly int $maxFileSize;
+    private int $maxFileSize;
 
     /**
      * @param list<string> $allowedExtensions
@@ -97,14 +106,14 @@ final class IncludeBlock extends AbstractBlock
  * @phpstan-type IncludeOptions array{lines?: IncludeLineRange}
  * @phpstan-type IncludeLoadResult array{content?: string, error?: string}
  */
-final class IncludeBlockParser implements BlockStartParserInterface
+final readonly class IncludeBlockParser implements BlockStartParserInterface
 {
-    private readonly string $basePath;
+    private string $basePath;
 
     /** @var list<string> */
-    private readonly array $allowedExtensions;
+    private array $allowedExtensions;
 
-    private readonly int $maxFileSize;
+    private int $maxFileSize;
 
     /**
      * @param list<string> $allowedExtensions
@@ -202,13 +211,7 @@ final class IncludeBlockParser implements BlockStartParserInterface
             return $options;
         }
 
-        $pairs = preg_split('/,\s*/', $optionsStr);
-
-        if (false === $pairs) {
-            return $options;
-        }
-
-        foreach ($pairs as $pair) {
+        foreach (preg_split('/,\s*/', $optionsStr) ?: [] as $pair) {
             if (!preg_match('/^(\w+):\s*(.+)$/', trim($pair), $matches)) {
                 continue;
             }
@@ -234,6 +237,10 @@ final class IncludeBlockParser implements BlockStartParserInterface
     private function loadFile(string $path, array $options): array
     {
         $fullPath = $this->resolvePath($path);
+
+        if ('' === $fullPath) {
+            return ['error' => "Path not allowed: $path"];
+        }
 
         // Validation
         if (!file_exists($fullPath)) {
@@ -274,11 +281,34 @@ final class IncludeBlockParser implements BlockStartParserInterface
 
     private function resolvePath(string $path): string
     {
-        if (str_starts_with($path, '/')) {
-            return $path;
+        $realBase = realpath($this->basePath);
+        if (false === $realBase) {
+            return '';
         }
 
-        return $this->basePath.'/'.$path;
+        $candidate = str_starts_with($path, '/')
+            ? $realBase.$path
+            : $realBase.'/'.$path;
+
+        $parts = explode('/', $candidate);
+        $resolved = [];
+        foreach ($parts as $part) {
+            if ('' === $part || '.' === $part) {
+                continue;
+            }
+            if ('..' === $part) {
+                array_pop($resolved);
+            } else {
+                $resolved[] = $part;
+            }
+        }
+        $resolvedPath = '/'.implode('/', $resolved);
+
+        if (!str_starts_with($resolvedPath, $realBase.'/') && $resolvedPath !== $realBase) {
+            return '';
+        }
+
+        return $resolvedPath;
     }
 }
 
@@ -304,7 +334,7 @@ final class IncludeBlockContinueParser extends AbstractBlockContinueParser
     }
 }
 
-final class IncludeRenderer implements NodeRendererInterface
+final readonly class IncludeRenderer implements NodeRendererInterface
 {
     public function render(Node $node, ChildNodeRendererInterface $childRenderer): string
     {
@@ -327,6 +357,7 @@ final class IncludeProcessor
 {
     private readonly int $maxDepth;
     private readonly EnvironmentBuilderInterface $environment;
+    private int $currentDepth = 0;
 
     public function __construct(int $maxDepth, EnvironmentBuilderInterface $environment)
     {
@@ -352,10 +383,10 @@ final class IncludeProcessor
                     continue;
                 }
 
-                // Parse the markdown content
+                ++$this->currentDepth;
                 $parsedContent = $this->parseMarkdown($content);
+                --$this->currentDepth;
 
-                // Add parsed content as children
                 if (null !== $parsedContent) {
                     foreach ($parsedContent->children() as $child) {
                         $node->appendChild($child);
@@ -367,7 +398,7 @@ final class IncludeProcessor
 
     private function parseMarkdown(string $markdown): ?\League\CommonMark\Node\Block\Document
     {
-        if ('' === $markdown || $this->maxDepth >= 0) {
+        if ($this->currentDepth > $this->maxDepth) {
             return null;
         }
 

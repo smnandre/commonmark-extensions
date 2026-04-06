@@ -2,6 +2,15 @@
 
 declare(strict_types=1);
 
+/*
+ * This file is part of the ALTO Commonmark package.
+ *
+ * © 2025–present Simon André
+ *
+ * For full copyright and license information, please see
+ * the LICENSE file distributed with this source code.
+ */
+
 namespace Alto\CommonMark\Extension\Tabs;
 
 use League\CommonMark\Environment\EnvironmentBuilderInterface;
@@ -18,7 +27,7 @@ use League\CommonMark\Parser\MarkdownParserStateInterface;
 use League\CommonMark\Renderer\ChildNodeRendererInterface;
 use League\CommonMark\Renderer\NodeRendererInterface;
 
-final class TabsExtension implements ExtensionInterface
+final readonly class TabsExtension implements ExtensionInterface
 {
     /**
      * @var array{
@@ -89,7 +98,7 @@ final class TabItem extends AbstractBlock
     }
 }
 
-final class TabGroupParser implements BlockStartParserInterface
+final readonly class TabGroupParser implements BlockStartParserInterface
 {
     public function tryStart(Cursor $cursor, MarkdownParserStateInterface $parserState): ?BlockStart
     {
@@ -124,7 +133,6 @@ final class TabGroupContinueParser extends AbstractBlockContinueParser
     /** @var list<TabItem> */
     private array $tabs = [];
     private bool $isFirstTab = true;
-    private bool $finalized = false;
 
     public function __construct(
         private TabGroup $block,
@@ -133,10 +141,11 @@ final class TabGroupContinueParser extends AbstractBlockContinueParser
 
     public function getBlock(): AbstractBlock
     {
-        if ($this->finalized) {
-            return $this->block;
-        }
+        return $this->block;
+    }
 
+    public function closeBlock(): void
+    {
         // Add the last tab if exists
         if (null !== $this->currentTabTitle) {
             $this->tabs[] = new TabItem(
@@ -156,9 +165,6 @@ final class TabGroupContinueParser extends AbstractBlockContinueParser
         }
 
         $this->block->tabs = $this->tabs;
-        $this->finalized = true;
-
-        return $this->block;
     }
 
     public function tryContinue(
@@ -211,7 +217,7 @@ final class TabGroupContinueParser extends AbstractBlockContinueParser
     }
 }
 
-final class TabGroupRenderer implements NodeRendererInterface
+final readonly class TabGroupRenderer implements NodeRendererInterface
 {
     /**
      * @var array{
@@ -361,7 +367,7 @@ final class TabGroupRenderer implements NodeRendererInterface
     }
 }
 
-final class TabItemRenderer implements NodeRendererInterface
+final readonly class TabItemRenderer implements NodeRendererInterface
 {
     public function render(Node $node, ChildNodeRendererInterface $childRenderer): string
     {

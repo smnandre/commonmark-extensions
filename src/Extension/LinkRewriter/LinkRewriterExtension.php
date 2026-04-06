@@ -2,6 +2,15 @@
 
 declare(strict_types=1);
 
+/*
+ * This file is part of the ALTO Commonmark package.
+ *
+ * © 2025–present Simon André
+ *
+ * For full copyright and license information, please see
+ * the LICENSE file distributed with this source code.
+ */
+
 namespace Alto\CommonMark\Extension\LinkRewriter;
 
 use League\CommonMark\Environment\EnvironmentBuilderInterface;
@@ -9,10 +18,10 @@ use League\CommonMark\Event\DocumentParsedEvent;
 use League\CommonMark\Extension\ExtensionInterface;
 use League\CommonMark\Node\Node;
 
-final class LinkRewriterExtension implements ExtensionInterface
+final readonly class LinkRewriterExtension implements ExtensionInterface
 {
-    /** @var callable(string, Node): string */
-    private $rewriter;
+    /** @var \Closure(string, Node): string */
+    private \Closure $rewriter;
 
     /**
      * @param array<string, mixed> $config

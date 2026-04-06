@@ -1,159 +1,213 @@
 # Alto CommonMark
 
-Reusable `league/commonmark` extensions in a monorepo, installable as either:
-- umbrella package: `alto/commonmark`, or
-- standalone extension packages (one per extension).
+Reusable `league/commonmark` extensions in a monorepo, installable as either the umbrella package `alto/commonmark` or as standalone per-extension packages.
 
 ## Installation
 
 ```bash
-# Umbrella package (includes all extensions)
 composer require alto/commonmark
 ```
 
-```bash
-# Standalone package example
-composer require alto/commonmark-table-of-contents
-```
+`alto/commonmark` declares `replace` on all standalone packages, so dependency resolution stays compatible whether you install one or all.
 
-`alto/commonmark` declares `replace` on standalone packages, so dependency resolution stays compatible.
+| Extension | Description | GitHub | Packagist |
+|-----------|-------------|--------|-----------|
+| CodeBlockTitle | Titled fenced code blocks rendered as `<figure>` | [GitHub](https://github.com/PhpAlto/commonmark-code-block-title) | [Packagist](https://packagist.org/packages/alto/commonmark-code-block-title) |
+| ContentSlicer | Wraps heading sections in semantic `<section>` elements | [GitHub](https://github.com/PhpAlto/commonmark-content-slicer) | [Packagist](https://packagist.org/packages/alto/commonmark-content-slicer) |
+| HeadingLevel | Shift or remap heading levels across the document | [GitHub](https://github.com/PhpAlto/commonmark-heading-level) | [Packagist](https://packagist.org/packages/alto/commonmark-heading-level) |
+| Import | Import file contents into code blocks with line ranges | [GitHub](https://github.com/PhpAlto/commonmark-import) | [Packagist](https://packagist.org/packages/alto/commonmark-import) |
+| Include | Inline-include Markdown fragments for doc composition | [GitHub](https://github.com/PhpAlto/commonmark-include) | [Packagist](https://packagist.org/packages/alto/commonmark-include) |
+| LinkRewriter | Rewrite links & images via base URI, map, or regex | [GitHub](https://github.com/PhpAlto/commonmark-link-rewriter) | [Packagist](https://packagist.org/packages/alto/commonmark-link-rewriter) |
+| Source | Embed source files with line numbers and highlighting | [GitHub](https://github.com/PhpAlto/commonmark-source) | [Packagist](https://packagist.org/packages/alto/commonmark-source) |
+| TableOfContents | Auto-generated TOC from headings via `@toc` | [GitHub](https://github.com/PhpAlto/commonmark-table-of-contents) | [Packagist](https://packagist.org/packages/alto/commonmark-table-of-contents) |
+| Tabs | Accessible ARIA tabbed UI from a simple `@tabs` directive | [GitHub](https://github.com/PhpAlto/commonmark-tabs) | [Packagist](https://packagist.org/packages/alto/commonmark-tabs) |
 
 ## Extensions
 
-| Extension | Description | Version |
-|-----------|-------------|--------:|
-| [CodeBlockTitle](src/Extension/CodeBlockTitle/README.md) | Render fenced code titles as figure captions. | `dev-main` |
-| [ContentSlicer](src/Extension/ContentSlicer/README.md) | Wrap heading-scoped content in semantic sections. | `dev-main` |
-| [HeadingLevel](src/Extension/HeadingLevel/README.md) | Transform heading levels by shift, map, or callback. | `dev-main` |
-| [Import](src/Extension/Import/README.md) | Import external file content via `@import`. | `dev-main` |
-| [Include](src/Extension/Include/README.md) | Include and parse markdown fragments inline. | `dev-main` |
-| [LinkRewriter](src/Extension/LinkRewriter/README.md) | Rewrite link/image URLs post-parse. | `dev-main` |
-| [Source](src/Extension/Source/README.md) | Render source files with ranges and highlighting. | `dev-main` |
-| [TableOfContents](src/Extension/TableOfContents/README.md) | Generate TOC blocks from document headings. | `dev-main` |
-| [Tabs](src/Extension/Tabs/README.md) | Render tabbed content from tab directives. | `dev-main` |
-
 ### CodeBlockTitle
-Adds support for code-block titles in fenced info strings.
+The detail that signals craft — adds a `title="..."` to any fenced code block and wraps it in a semantic `<figure>`/`<figcaption>`. One small thing that makes a doc site feel finished.
 
-```php
-use Alto\CommonMark\Extension\CodeBlockTitle\CodeBlockTitleExtension;
-$environment->addExtension(new CodeBlockTitleExtension());
+````markdown
+```php title="hello.php"
+echo "Hello";
+```
+````
+
+```html
+<figure class="code-block has-title" data-title="hello.php">
+  <figcaption class="code-title">hello.php</figcaption>
+  <pre><code class="language-php">echo "Hello";
+</code></pre>
+</figure>
 ```
 
-- Doc: [src/Extension/CodeBlockTitle/README.md](src/Extension/CodeBlockTitle/README.md)
-- GitHub: [src/Extension/CodeBlockTitle](https://github.com/alto/commonmark/tree/main/src/Extension/CodeBlockTitle)
-- Packagist: [alto/commonmark-code-block-title](https://packagist.org/packages/alto/commonmark-code-block-title)
+[Doc](src/Extension/CodeBlockTitle/README.md) · [GitHub](https://github.com/alto/commonmark/tree/main/src/Extension/CodeBlockTitle) · [Packagist](https://packagist.org/packages/alto/commonmark-code-block-title)
+
+---
 
 ### ContentSlicer
-Wraps heading-based content segments in nested `<section>` blocks.
+The rarest one in the set. Most processors stop at rendering headings as tags — this one restructures the entire document into a properly nested `<section>` tree, giving CSS selectors, JavaScript, and accessibility tooling something real to work with. No custom syntax needed.
 
-```php
-use Alto\CommonMark\Extension\ContentSlicer\ContentSlicerExtension;
-$environment->addExtension(new ContentSlicerExtension());
+```markdown
+## Subtopic 1
+More content.
+## Subtopic 2
+Final content.
 ```
 
-- Doc: [src/Extension/ContentSlicer/README.md](src/Extension/ContentSlicer/README.md)
-- GitHub: [src/Extension/ContentSlicer](https://github.com/alto/commonmark/tree/main/src/Extension/ContentSlicer)
-- Packagist: [alto/commonmark-content-slicer](https://packagist.org/packages/alto/commonmark-content-slicer)
+```html
+<section><h2>Subtopic 1</h2><p>More content.</p></section>
+<section><h2>Subtopic 2</h2><p>Final content.</p></section>
+```
+
+[Doc](src/Extension/ContentSlicer/README.md) · [GitHub](https://github.com/alto/commonmark/tree/main/src/Extension/ContentSlicer) · [Packagist](https://packagist.org/packages/alto/commonmark-content-slicer)
+
+---
 
 ### HeadingLevel
-Adjusts heading levels during document processing.
+The one you don't need until you really do — then it's irreplaceable. Shifts, remaps, or transforms heading levels when embedding content from one context into another without heading hierarchy collisions.
 
-```php
-use Alto\CommonMark\Extension\HeadingLevel\HeadingLevelExtension;
-$environment->addExtension(new HeadingLevelExtension(['down' => 1]));
+```markdown
+# Title
+## Section
 ```
 
-- Doc: [src/Extension/HeadingLevel/README.md](src/Extension/HeadingLevel/README.md)
-- GitHub: [src/Extension/HeadingLevel](https://github.com/alto/commonmark/tree/main/src/Extension/HeadingLevel)
-- Packagist: [alto/commonmark-heading-level](https://packagist.org/packages/alto/commonmark-heading-level)
+```html
+<!-- with down: 1 -->
+<h2>Title</h2>
+<h3>Section</h3>
+```
+
+[Doc](src/Extension/HeadingLevel/README.md) · [GitHub](https://github.com/alto/commonmark/tree/main/src/Extension/HeadingLevel) · [Packagist](https://packagist.org/packages/alto/commonmark-heading-level)
+
+---
 
 ### Import
-Imports file content with optional line range, language, and indentation options.
+Solves copy-paste drift between your docs and your source code. Pulls external file content directly into a code block — with line-range selection, language hinting, and depth-limited circular-import protection.
 
-```php
-use Alto\CommonMark\Extension\Import\ImportExtension;
-$environment->addExtension(new ImportExtension(__DIR__ . '/docs'));
+```markdown
+@import "src/Auth.php" {lines: 1-30, lang: php}
 ```
 
-- Doc: [src/Extension/Import/README.md](src/Extension/Import/README.md)
-- GitHub: [src/Extension/Import](https://github.com/alto/commonmark/tree/main/src/Extension/Import)
-- Packagist: [alto/commonmark-import](https://packagist.org/packages/alto/commonmark-import)
+```html
+<pre><code class="language-php">// src/Auth.php lines 1–30
+</code></pre>
+```
+
+[Doc](src/Extension/Import/README.md) · [GitHub](https://github.com/alto/commonmark/tree/main/src/Extension/Import) · [Packagist](https://packagist.org/packages/alto/commonmark-import)
+
+---
 
 ### Include
-Includes markdown files and parses them in the current document context.
+The backbone of large documentation sets. Pulls in and fully parses markdown fragments inline — making one-file-per-section composition possible without a build system.
 
-```php
-use Alto\CommonMark\Extension\Include\IncludeExtension;
-$environment->addExtension(new IncludeExtension(__DIR__ . '/docs'));
+```markdown
+@include "parts/intro.md"
 ```
 
-- Doc: [src/Extension/Include/README.md](src/Extension/Include/README.md)
-- GitHub: [src/Extension/Include](https://github.com/alto/commonmark/tree/main/src/Extension/Include)
-- Packagist: [alto/commonmark-include](https://packagist.org/packages/alto/commonmark-include)
+```html
+<h2>Introduction</h2>
+<p>This is the introduction section.</p>
+```
+
+[Doc](src/Extension/Include/README.md) · [GitHub](https://github.com/alto/commonmark/tree/main/src/Extension/Include) · [Packagist](https://packagist.org/packages/alto/commonmark-include)
+
+---
 
 ### LinkRewriter
-Rewrites link and image URLs using configured rewrite rules.
+Indispensable plumbing for any hosted documentation setup. Decouples your markdown from your deployment URL with a composable chain of rewrite rules — base URI, exact maps, regex, and custom callbacks — applied in sequence.
 
-```php
-use Alto\CommonMark\Extension\LinkRewriter\LinkRewriterExtension;
-$environment->addExtension(new LinkRewriterExtension(['base_uri' => 'https://docs.example.com']));
+```markdown
+[Guide](/getting-started)
+![Logo](/assets/logo.svg)
 ```
 
-- Doc: [src/Extension/LinkRewriter/README.md](src/Extension/LinkRewriter/README.md)
-- GitHub: [src/Extension/LinkRewriter](https://github.com/alto/commonmark/tree/main/src/Extension/LinkRewriter)
-- Packagist: [alto/commonmark-link-rewriter](https://packagist.org/packages/alto/commonmark-link-rewriter)
+```html
+<!-- with base_uri: https://docs.example.com -->
+<a href="https://docs.example.com/getting-started">Guide</a>
+<img src="https://docs.example.com/assets/logo.svg" alt="Logo">
+```
+
+[Doc](src/Extension/LinkRewriter/README.md) · [GitHub](https://github.com/alto/commonmark/tree/main/src/Extension/LinkRewriter) · [Packagist](https://packagist.org/packages/alto/commonmark-link-rewriter)
+
+---
 
 ### Source
-Displays file content as source blocks with display options.
+The flagship of the set. Embeds a real file — not a copy — directly into your documentation, with syntax detection, line-range selection, line numbers, and per-line highlighting. Your docs stay in sync with your code by definition.
 
-```php
-use Alto\CommonMark\Extension\Source\SourceExtension;
-$environment->addExtension(new SourceExtension(__DIR__));
+```markdown
+@source "src/Service.php" {lines: 9-11, numbers: true, highlight: "9,11"}
 ```
 
-- Doc: [src/Extension/Source/README.md](src/Extension/Source/README.md)
-- GitHub: [src/Extension/Source](https://github.com/alto/commonmark/tree/main/src/Extension/Source)
-- Packagist: [alto/commonmark-source](https://packagist.org/packages/alto/commonmark-source)
+```html
+<div class="source-block">
+  <div class="source-path">src/Service.php</div>
+  <pre><code class="language-php"><span class="line highlighted"><span class="line-number">9</span>    public function add(int $a, int $b): int</span>
+<span class="line"><span class="line-number">10</span>    {</span>
+<span class="line highlighted"><span class="line-number">11</span>        return $a + $b;</span></code></pre>
+</div>
+```
+
+[Doc](src/Extension/Source/README.md) · [GitHub](https://github.com/alto/commonmark/tree/main/src/Extension/Source) · [Packagist](https://packagist.org/packages/alto/commonmark-source)
+
+---
 
 ### TableOfContents
-Generates table-of-contents output from `@toc` directives.
+A must-have for any document longer than a page. Drop `@toc` where you want the contents list — headings are collected, IDs assigned, and a navigable list rendered in one pass.
 
-```php
-use Alto\CommonMark\Extension\TableOfContents\TableOfContentsExtension;
-$environment->addExtension(new TableOfContentsExtension());
+```markdown
+@toc {min: 2}
+## Introduction
+## Setup
 ```
 
-- Doc: [src/Extension/TableOfContents/README.md](src/Extension/TableOfContents/README.md)
-- GitHub: [src/Extension/TableOfContents](https://github.com/alto/commonmark/tree/main/src/Extension/TableOfContents)
-- Packagist: [alto/commonmark-table-of-contents](https://packagist.org/packages/alto/commonmark-table-of-contents)
+```html
+<div class="table-of-contents" id="toc">
+  <ul>
+    <li><a href="#introduction">Introduction</a></li>
+    <li><a href="#setup">Setup</a></li>
+  </ul>
+</div>
+```
+
+[Doc](src/Extension/TableOfContents/README.md) · [GitHub](https://github.com/alto/commonmark/tree/main/src/Extension/TableOfContents) · [Packagist](https://packagist.org/packages/alto/commonmark-table-of-contents)
+
+---
 
 ### Tabs
-Creates tabbed sections from tab-group markdown directives.
+One directive, fully accessible tabbed UI, zero JavaScript to write. Wraps content in proper ARIA `tablist`/`tab`/`tabpanel` roles with a self-contained switching script.
 
+````markdown
+@tabs
+@tab "PHP"
 ```php
-use Alto\CommonMark\Extension\Tabs\TabsExtension;
-$environment->addExtension(new TabsExtension());
+echo 'Hello';
+```
+@tab "JS"
+```js
+console.log('Hello');
+```
+@endtabs
+````
+
+```html
+<div class="tab-group" data-tabs-id="tabs-1">
+  <div class="tab-list" role="tablist">
+    <button class="tab active" role="tab" aria-selected="true"  aria-controls="tabs-1-panel-0">PHP</button>
+    <button class="tab"        role="tab" aria-selected="false" aria-controls="tabs-1-panel-1">JS</button>
+  </div>
+  <div class="tab-panels">
+    <div class="tab-panel" id="tabs-1-panel-0" role="tabpanel">…</div>
+    <div class="tab-panel" id="tabs-1-panel-1" role="tabpanel">…</div>
+  </div>
+</div>
 ```
 
-- Doc: [src/Extension/Tabs/README.md](src/Extension/Tabs/README.md)
-- GitHub: [src/Extension/Tabs](https://github.com/alto/commonmark/tree/main/src/Extension/Tabs)
-- Packagist: [alto/commonmark-tabs](https://packagist.org/packages/alto/commonmark-tabs)
+[Doc](src/Extension/Tabs/README.md) · [GitHub](https://github.com/alto/commonmark/tree/main/src/Extension/Tabs) · [Packagist](https://packagist.org/packages/alto/commonmark-tabs)
 
-## Testing Layout
+## Support
 
-Current organization is intentionally kept as:
-- `tests/Unit/Extension/...`
-- `tests/Integration/Extension/...`
-
-This keeps CI and discovery simple while extension coverage is expanded (notably for `Import`, `Include`, and `Tabs`).
-
-## Development
-
-```bash
-composer install
-vendor/bin/phpunit
-```
+If Alto CommonMark is useful to your project, [sponsoring on GitHub](https://github.com/sponsors/smnandre) is a great way to support continued development — and it's always appreciated.
 
 ## License
 

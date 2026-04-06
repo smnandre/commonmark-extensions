@@ -2,6 +2,15 @@
 
 declare(strict_types=1);
 
+/*
+ * This file is part of the ALTO Commonmark package.
+ *
+ * © 2025–present Simon André
+ *
+ * For full copyright and license information, please see
+ * the LICENSE file distributed with this source code.
+ */
+
 namespace Alto\CommonMark\Extension\CodeBlockTitle;
 
 use League\CommonMark\Environment\EnvironmentBuilderInterface;
@@ -10,10 +19,10 @@ use League\CommonMark\Extension\CommonMark\Renderer\Block\FencedCodeRenderer;
 use League\CommonMark\Extension\ExtensionInterface;
 use League\CommonMark\Renderer\NodeRendererInterface;
 
-final class CodeBlockTitleExtension implements ExtensionInterface
+final readonly class CodeBlockTitleExtension implements ExtensionInterface
 {
     public function __construct(
-        private readonly ?NodeRendererInterface $baseRenderer = null,
+        private ?NodeRendererInterface $baseRenderer = null,
     ) {
     }
 
@@ -29,7 +38,5 @@ final class CodeBlockTitleExtension implements ExtensionInterface
 
             // TODO if/check herer: 'return'
         );
-
-        return;
     }
 }

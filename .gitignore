@@ -2,5 +2,6 @@
 /vendor/
 /.php-cs-fixer.cache
 /composer.lock
+src/**/composer.lock
 /phpstan.neon
 /phpunit.xml

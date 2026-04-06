@@ -2,6 +2,15 @@
 
 declare(strict_types=1);
 
+/*
+ * This file is part of the ALTO Commonmark package.
+ *
+ * © 2025–present Simon André
+ *
+ * For full copyright and license information, please see
+ * the LICENSE file distributed with this source code.
+ */
+
 namespace Alto\CommonMark\Tests\Unit\Extension\LinkRewriter;
 
 use Alto\CommonMark\Extension\LinkRewriter\LinkRewriterExtension;
@@ -140,6 +149,42 @@ final class LinkRewriterExtensionTest extends TestCase
         $actual = $this->convert($markdown);
 
         self::assertSame($expected, $actual);
+    }
+
+    public function testThrowsTypeErrorForNonStringBaseUri(): void
+    {
+        $this->expectException(\TypeError::class);
+        new LinkRewriterExtension(['base_uri' => 123]);
+    }
+
+    public function testThrowsTypeErrorForNonArrayMap(): void
+    {
+        $this->expectException(\TypeError::class);
+        new LinkRewriterExtension(['map' => 'not-an-array']);
+    }
+
+    public function testThrowsTypeErrorForMapWithNonStringEntry(): void
+    {
+        $this->expectException(\TypeError::class);
+        new LinkRewriterExtension(['map' => ['/from' => 42]]);
+    }
+
+    public function testThrowsTypeErrorForNonArrayPattern(): void
+    {
+        $this->expectException(\TypeError::class);
+        new LinkRewriterExtension(['pattern' => 'not-an-array']);
+    }
+
+    public function testThrowsTypeErrorForPatternMissingKeys(): void
+    {
+        $this->expectException(\TypeError::class);
+        new LinkRewriterExtension(['pattern' => ['only-pattern' => '#foo#']]);
+    }
+
+    public function testThrowsTypeErrorForNonCallableCallback(): void
+    {
+        $this->expectException(\TypeError::class);
+        new LinkRewriterExtension(['callback' => 'not-callable']);
     }
 
     /**

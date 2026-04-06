@@ -1,14 +1,7 @@
 # HeadingLevel Extension
 
-Adjusts heading levels in a document through mapping, shifts, or custom callbacks.
-
-## Installation
-
-The extension is included in the `alto/commonmark` package:
-
-```bash
-composer require alto/commonmark
-```
+Adjusts heading levels in a document through mapping, shifts, or custom
+callbacks.
 
 ## Basic Usage
 
@@ -101,15 +94,19 @@ new HeadingLevelExtension([
 ### Shift Down
 
 Input:
+
 ```markdown
 # Main Title
+
 ## Subtitle
+
 ### Details
 ```
 
 Config: `['down' => 1]`
 
 Output:
+
 ```html
 <h2>Main Title</h2>
 <h3>Subtitle</h3>
@@ -119,14 +116,17 @@ Output:
 ### Shift Up
 
 Input:
+
 ```markdown
 ### Nested Heading
+
 #### Sub-section
 ```
 
 Config: `['down' => -2]`
 
 Output:
+
 ```html
 <h1>Nested Heading</h1>
 <h2>Sub-section</h2>
@@ -135,15 +135,19 @@ Output:
 ### Custom Mapping
 
 Input:
+
 ```markdown
 # Title
+
 ## Section
+
 ### Subsection
 ```
 
 Config: `['map' => [1 => 2, 2 => 3, 3 => 4]]`
 
 Output:
+
 ```html
 <h2>Title</h2>
 <h3>Section</h3>
@@ -211,7 +215,8 @@ $environment->addExtension(
 );
 ```
 
-The heading adjustment happens before sectioning, so sections reflect the adjusted levels.
+The heading adjustment happens before sectioning, so sections reflect the
+adjusted levels.
 
 ## Common Patterns
 
@@ -273,7 +278,8 @@ new HeadingLevelExtension([
 - **Custom Nodes**: None (modifies existing `Heading` nodes)
 - **Tree Traversal**: Walks AST and modifies heading levels
 
-The extension processes the document after parsing and directly modifies heading levels in the AST.
+The extension processes the document after parsing and directly modifies heading
+levels in the AST.
 
 ## Examples
 
@@ -357,6 +363,14 @@ Remember that multiple config options apply in sequence:
 
 ## See Also
 
-- [ContentSlicer Extension](ContentSlicer.md) - Create sections based on heading levels
-- [`league/commonmark` documentation](https://commonmark.thephpleague.com/)
-- [HeadingLevel README in source](../src/Extension/HeadingLevel/README.md)
+- [ContentSlicer Extension](ContentSlicer.md) - Create sections based on heading
+  levels
+- [league/commonmark documentation](https://commonmark.thephpleague.com/)
+
+---
+
+> **This package is part of
+the [alto/commonmark](https://github.com/PhpAlto/commonmark) monorepo.**  
+> This repository is a read-only split — to file issues, open pull requests, or
+> contribute, please use the main repository: *
+*https://github.com/PhpAlto/commonmark**

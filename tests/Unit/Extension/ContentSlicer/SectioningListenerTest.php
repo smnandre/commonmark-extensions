@@ -2,6 +2,15 @@
 
 declare(strict_types=1);
 
+/*
+ * This file is part of the ALTO Commonmark package.
+ *
+ * © 2025–present Simon André
+ *
+ * For full copyright and license information, please see
+ * the LICENSE file distributed with this source code.
+ */
+
 namespace Alto\CommonMark\Tests\Unit\Extension\ContentSlicer;
 
 use Alto\CommonMark\Extension\ContentSlicer\SectioningListener;
@@ -17,6 +26,7 @@ use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\TestCase;
 
 #[CoversClass(SectioningListener::class)]
+#[CoversClass(SectionNode::class)]
 final class SectioningListenerTest extends TestCase
 {
     private function createParser(): MarkdownParser

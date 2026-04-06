@@ -2,15 +2,24 @@
 
 declare(strict_types=1);
 
+/*
+ * This file is part of the ALTO Commonmark package.
+ *
+ * © 2025–present Simon André
+ *
+ * For full copyright and license information, please see
+ * the LICENSE file distributed with this source code.
+ */
+
 namespace Alto\CommonMark\Extension\ContentSlicer;
 
 use League\CommonMark\Event\DocumentParsedEvent;
 use League\CommonMark\Extension\CommonMark\Node\Block\Heading;
 
-final class SectioningListener
+final readonly class SectioningListener
 {
     public function __construct(
-        private readonly int $minSectionLevel = 1,
+        private int $minSectionLevel = 1,
     ) {
     }
 

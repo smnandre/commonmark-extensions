@@ -2,6 +2,15 @@
 
 declare(strict_types=1);
 
+/*
+ * This file is part of the ALTO Commonmark package.
+ *
+ * © 2025–present Simon André
+ *
+ * For full copyright and license information, please see
+ * the LICENSE file distributed with this source code.
+ */
+
 namespace Alto\CommonMark\Extension\Import;
 
 use League\CommonMark\Environment\EnvironmentBuilderInterface;
@@ -113,8 +122,15 @@ final class ImportParser implements BlockStartParserInterface
             return BlockStart::of(new ImportBlockParser($block));
         }
 
-        // Prevent circular imports
+        // Prevent path traversal
         $fullPath = $this->resolvePath($path);
+        if ('' === $fullPath) {
+            $block = new ImportBlock($path, null, null, 0, '', "Path not allowed: $path");
+
+            return BlockStart::of(new ImportBlockParser($block));
+        }
+
+        // Prevent circular imports
         if (in_array($fullPath, $this->importedFiles, true)) {
             $block = new ImportBlock($path, null, null, 0, '', 'Circular import detected');
 
@@ -156,13 +172,7 @@ final class ImportParser implements BlockStartParserInterface
             return $options;
         }
 
-        $pairs = preg_split('/,\s*/', $optionsStr);
-
-        if (false === $pairs) {
-            return $options;
-        }
-
-        foreach ($pairs as $pair) {
+        foreach (preg_split('/,\s*/', $optionsStr) ?: [] as $pair) {
             if (!preg_match('/^(\w+):\s*(.+)$/', trim($pair), $matches)) {
                 continue;
             }
@@ -216,11 +226,34 @@ final class ImportParser implements BlockStartParserInterface
 
     private function resolvePath(string $path): string
     {
-        if (str_starts_with($path, '/')) {
-            return $path;
+        $realBase = realpath($this->basePath);
+        if (false === $realBase) {
+            return '';
         }
 
-        return $this->basePath.'/'.$path;
+        $candidate = str_starts_with($path, '/')
+            ? $realBase.$path
+            : $realBase.'/'.$path;
+
+        $parts = explode('/', $candidate);
+        $resolved = [];
+        foreach ($parts as $part) {
+            if ('' === $part || '.' === $part) {
+                continue;
+            }
+            if ('..' === $part) {
+                array_pop($resolved);
+            } else {
+                $resolved[] = $part;
+            }
+        }
+        $resolvedPath = '/'.implode('/', $resolved);
+
+        if (!str_starts_with($resolvedPath, $realBase.'/') && $resolvedPath !== $realBase) {
+            return '';
+        }
+
+        return $resolvedPath;
     }
 
     /**
@@ -284,7 +317,7 @@ final class ImportBlockParser extends AbstractBlockContinueParser
     }
 }
 
-final class ImportRenderer implements NodeRendererInterface
+final readonly class ImportRenderer implements NodeRendererInterface
 {
     public function render(Node $node, ChildNodeRendererInterface $childRenderer): string
     {

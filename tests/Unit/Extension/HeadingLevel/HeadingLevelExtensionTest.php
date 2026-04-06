@@ -2,22 +2,45 @@
 
 declare(strict_types=1);
 
+/*
+ * This file is part of the ALTO Commonmark package.
+ *
+ * © 2025–present Simon André
+ *
+ * For full copyright and license information, please see
+ * the LICENSE file distributed with this source code.
+ */
+
 namespace Alto\CommonMark\Tests\Unit\Extension\HeadingLevel;
 
 use Alto\CommonMark\Extension\HeadingLevel\HeadingLevelExtension;
+use Alto\CommonMark\Extension\HeadingLevel\HeadingLevelProcessor;
 use Alto\CommonMark\Testing\CommonMarkExtensionTestCase;
 use League\CommonMark\Environment\Environment;
+use League\CommonMark\Environment\EnvironmentBuilderInterface;
 use League\CommonMark\Extension\CommonMark\CommonMarkCoreExtension;
 use League\CommonMark\Extension\ExtensionInterface;
 use League\CommonMark\MarkdownConverter;
 use PHPUnit\Framework\Attributes\CoversClass;
 
 #[CoversClass(HeadingLevelExtension::class)]
+#[CoversClass(HeadingLevelProcessor::class)]
+#[CoversClass(CommonMarkExtensionTestCase::class)]
 final class HeadingLevelExtensionTest extends CommonMarkExtensionTestCase
 {
     protected function getExtension(): ExtensionInterface
     {
         return new HeadingLevelExtension([]);
+    }
+
+    protected function getExtraExtensions(): iterable
+    {
+        // Yields a no-op extension to exercise the base class extra-extension loop
+        yield new class implements ExtensionInterface {
+            public function register(EnvironmentBuilderInterface $environment): void
+            {
+            }
+        };
     }
 
     public function testMapConfigurationTransformsMappedLevelsOnly(): void
@@ -65,6 +88,33 @@ final class HeadingLevelExtensionTest extends CommonMarkExtensionTestCase
         ], $markdown);
 
         self::assertSame($expected, $actual);
+    }
+
+    public function testBaseClassHtmlMethodConvertsMarkdown(): void
+    {
+        $html = $this->html('# Hello');
+
+        self::assertStringContainsString('<h1>Hello</h1>', $html);
+    }
+
+    public function testBaseClassEnvironmentIsAccessible(): void
+    {
+        $env = $this->environment();
+
+        self::assertInstanceOf(Environment::class, $env);
+    }
+
+    public function testBaseClassAssertHtmlContains(): void
+    {
+        $this->assertHtmlContains('# Title', ['<h1>Title</h1>']);
+    }
+
+    public function testBaseClassAssertHtmlSameAsFixture(): void
+    {
+        $this->assertHtmlSameAsFixture(
+            __DIR__.'/../../../Fixtures/Extension/HeadingLevel/no-config.md',
+            __DIR__.'/../../../Fixtures/Extension/HeadingLevel/no-config.html',
+        );
     }
 
     /**

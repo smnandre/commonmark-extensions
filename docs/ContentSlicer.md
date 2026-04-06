@@ -1,14 +1,7 @@
 # ContentSlicer Extension
 
-Automatically divides a document into nested `<section>` elements based on heading hierarchy, creating a semantic document structure.
-
-## Installation
-
-The extension is included in the `alto/commonmark` package:
-
-```bash
-composer require alto/commonmark
-```
+Automatically divides a document into nested `<section>` elements based on
+heading hierarchy, creating a semantic document structure.
 
 ## Basic Usage
 
@@ -50,7 +43,8 @@ echo $converter->convert($markdown);
 
 ## How It Works
 
-The extension processes the document after parsing and restructures it based on heading levels:
+The extension processes the document after parsing and restructures it based on
+heading levels:
 
 1. **Detection**: Identifies all headings in the document
 2. **Grouping**: Groups content following each heading
@@ -62,56 +56,72 @@ The extension processes the document after parsing and restructures it based on 
 ### Simple Structure
 
 Input:
+
 ```markdown
 # Main Topic
+
 Content here.
+
 ## Subtopic
+
 More content.
 ```
 
 Output:
+
 ```html
+
 <section>
-  <h1>Main Topic</h1>
-  <p>Content here.</p>
-  <section>
-    <h2>Subtopic</h2>
-    <p>More content.</p>
-  </section>
+    <h1>Main Topic</h1>
+    <p>Content here.</p>
+    <section>
+        <h2>Subtopic</h2>
+        <p>More content.</p>
+    </section>
 </section>
 ```
 
 ### Complex Hierarchy
 
 Input:
+
 ```markdown
 # Main
+
 Content 1
+
 ## Sub 1
+
 Content 2
+
 ### Sub 1.1
+
 Content 3
+
 ## Sub 2
+
 Content 4
 ```
 
 Output:
+
 ```html
+
 <section>
-  <h1>Main</h1>
-  <p>Content 1</p>
-  <section>
-    <h2>Sub 1</h2>
-    <p>Content 2</p>
+    <h1>Main</h1>
+    <p>Content 1</p>
     <section>
-      <h3>Sub 1.1</h3>
-      <p>Content 3</p>
+        <h2>Sub 1</h2>
+        <p>Content 2</p>
+        <section>
+            <h3>Sub 1.1</h3>
+            <p>Content 3</p>
+        </section>
     </section>
-  </section>
-  <section>
-    <h2>Sub 2</h2>
-    <p>Content 4</p>
-  </section>
+    <section>
+        <h2>Sub 2</h2>
+        <p>Content 4</p>
+    </section>
 </section>
 ```
 
@@ -146,16 +156,16 @@ Generate CSS to style the section structure:
 section {
   margin: 20px 0;
   padding: 16px;
-  border-left: 4px solid #007bff;
+  border-left: 4px solid #007BFF;
 }
 
 section section {
   margin-left: 20px;
-  border-left-color: #28a745;
+  border-left-color: #28A745;
 }
 
 section section section {
-  border-left-color: #ffc107;
+  border-left-color: #FFC107;
 }
 
 h1, h2, h3, h4, h5, h6 {
@@ -185,22 +195,26 @@ echo $html;
 
 ### Handling Content Before First Heading
 
-Content that appears before the first heading is preserved at the document root level:
+Content that appears before the first heading is preserved at the document root
+level:
 
 Input:
+
 ```markdown
 Introduction paragraph.
 
 # Section 1
+
 Content here.
 ```
 
 Output:
+
 ```html
 <p>Introduction paragraph.</p>
 <section>
-  <h1>Section 1</h1>
-  <p>Content here.</p>
+    <h1>Section 1</h1>
+    <p>Content here.</p>
 </section>
 ```
 
@@ -208,7 +222,8 @@ Output:
 
 ### Documentation Sites
 
-Structure documentation with automatic section wrapping for better semantics and styling.
+Structure documentation with automatic section wrapping for better semantics and
+styling.
 
 ### Blog Posts
 
@@ -216,11 +231,13 @@ Automatically organize blog content with proper heading hierarchy.
 
 ### HTML Export
 
-Create valid, nested section structures for better accessibility and semantic meaning.
+Create valid, nested section structures for better accessibility and semantic
+meaning.
 
 ### API Documentation
 
-Generate properly nested sections for endpoint documentation organized by resource or category.
+Generate properly nested sections for endpoint documentation organized by
+resource or category.
 
 ## Implementation Details
 
@@ -229,7 +246,8 @@ Generate properly nested sections for endpoint documentation organized by resour
 - **Custom Nodes**: `Section` (custom block node)
 - **Renderers**: `SectionRenderer` (renders `<section>` tags)
 
-The extension listens to the document parsed event and creates custom `Section` nodes that are then rendered as `<section>` HTML elements.
+The extension listens to the document parsed event and creates custom `Section`
+nodes that are then rendered as `<section>` HTML elements.
 
 ## Examples
 
@@ -328,12 +346,17 @@ $converter = new MarkdownConverter($environment);
 
 ### Unexpected nesting
 
-Verify your heading hierarchy is logical. The extension respects heading levels strictly. If you have an h1 followed by an h3 (skipping h2), the h3 will nest under the h1.
+Verify your heading hierarchy is logical. The extension respects heading levels
+strictly. If you have an h1 followed by an h3 (skipping h2), the h3 will nest
+under the h1.
 
 To fix:
+
 ```markdown
 # Main         <!-- h1 -->
+
 ## Sub         <!-- h2 - not h3 -->
+
 ### Sub-sub    <!-- h3 - now properly nested -->
 ```
 
@@ -350,5 +373,12 @@ $environment->addExtension(new ContentSlicerExtension());
 ## See Also
 
 - [HeadingLevel Extension](HeadingLevel.md) - Adjust heading levels
-- [`league/commonmark` documentation](https://commonmark.thephpleague.com/)
-- [ContentSlicer README in source](../src/Extension/ContentSlicer/README.md)
+- [league/commonmark documentation](https://commonmark.thephpleague.com/)
+
+---
+
+> **This package is part of
+the [alto/commonmark](https://github.com/PhpAlto/commonmark) monorepo.**  
+> This repository is a read-only split — to file issues, open pull requests, or
+> contribute, please use the main repository: *
+*https://github.com/PhpAlto/commonmark**
